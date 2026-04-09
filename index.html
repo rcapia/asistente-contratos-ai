@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Mi Asistente de Contratos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white flex items-center justify-center min-h-screen">
+    <div class="w-full max-w-2xl p-8 bg-gray-800 rounded-2xl shadow-2xl border border-gray-700">
+        <h1 class="text-3xl font-bold mb-6 text-blue-400">Consultoría de Cartera AI</h1>
+        
+        <p class="mb-4 text-gray-400">Pregunta sobre saldos, monedas o tipos de contrato:</p>
+        
+        <textarea id="pregunta" 
+            class="w-full h-40 p-4 bg-gray-900 rounded-lg border border-gray-600 focus:ring-2 focus:ring-blue-500 text-white placeholder-gray-500"
+            placeholder="Ej: ¿Cuál es el monto total en USD de mi cartera?"></textarea>
+        
+        <button onclick="enviarConsulta()" id="btn"
+            class="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition-all disabled:opacity-50">
+            Consultar a Mistral + Neon
+        </button>
+
+        <div id="loading" class="hidden mt-6 text-center text-blue-300 animate-pulse font-medium">
+            🤖 Conectando con la base de datos y procesando respuesta...
+        </div>
+        
+        <div id="resultado" class="mt-8 p-6 bg-gray-900 rounded-xl border-l-4 border-blue-500 hidden text-gray-200 leading-relaxed">
+            </div>
+    </div>
+
+    <script>
+        async function enviarConsulta() {
+            const pregunta = document.getElementById('pregunta').value;
+            const resDiv = document.getElementById('resultado');
+            const btn = document.getElementById('btn');
+            const loading = document.getElementById('loading');
+
+            if(!pregunta) return alert("Por favor, escribe una pregunta.");
+
+            btn.disabled = true;
+            loading.classList.remove('hidden');
+            resDiv.classList.add('hidden');
+
+            try {
+                // CAMBIA ESTA URL por la de tu Space (debe terminar en /consultar)
+                const URL_API = 'https://rcapia-mi-asistente-contratos.hf.space/consultar';
+
+                const response = await fetch(URL_API, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ pregunta: pregunta })
+                });
+                
+                const data = await response.json();
+                resDiv.innerText = data.respuesta;
+                resDiv.classList.remove('hidden');
+            } catch (error) {
+                resDiv.innerText = "Error: No se pudo conectar con el servidor de AI.";
+                resDiv.classList.remove('hidden');
+                console.error(error);
+            } finally {
+                btn.disabled = false;
+                loading.classList.add('hidden');
+            }
+        }
+    </script>
+</body>
+</html>
